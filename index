@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical Tourism Planner Prototype</title>
+
+<style>
+body {
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#F2F2F2;
+}
+.screen {
+  padding:20px;
+  display:none;
+}
+.active {
+  display:block;
+}
+
+/* Header */
+header {
+  position:fixed;
+  top:0;
+  width:100%;
+  background:#ddd;
+  padding:12px;
+  text-align:center;
+  font-weight:bold;
+  border-bottom:1px solid #aaa;
+}
+
+/* Nav */
+nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #ddd;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  border-top:1px solid #aaa;
+}
+nav button {
+  background:none;
+  border:none;
+  font-size:12px;
+}
+
+/* UI elements */
+.box {
+  background:#fff;
+  padding:12px;
+  margin-bottom:12px;
+  border:1px solid #ccc;
+}
+input, select, button, textarea {
+  width:100%;
+  padding:8px;
+  margin:5px 0;
+  box-sizing:border-box;
+}
+button.primary {
+  background:#000;
+  color:#fff;
+  border:none;
+  padding:10px;
+  margin-top:10px;
+}
+.progress {
+  display:flex;
+  margin:10px 0;
+}
+.progress div {
+  flex:1;
+  padding:10px;
+  margin-right:4px;
+  background:#ccc;
+  text-align:center;
+  font-size:12px;
+}
+.progress div.active-step {
+  background:#999;
+  font-weight:bold;
+}
+</style>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById("header").innerText = document.getElementById(id).getAttribute("data-title");
+}
+
+/* Fake cost calculator */
+function calculateCost() {
+  let days = Number(document.getElementById("days").value);
+  let room = Number(document.getElementById("room").value);
+  let tests = Number(document.getElementById("tests").value);
+  let total = (days * 200) + (room * 100) + (tests * 50);
+  document.getElementById("cost-output").innerText = "Estimated Cost: $" + total;
+}
+
+/* Add itinerary item */
+function addItinerary() {
+  let item = document.getElementById("itinerary-input").value;
+  if(item.trim() !== "") {
+    let list = document.getElementById("itinerary-list");
+    let li = document.createElement("li");
+    li.innerText = item;
+    list.appendChild(li);
+    document.getElementById("itinerary-input").value = "";
+  }
+}
+
+/* Billing Tracker Add Item */
+function addBillingItem() {
+  let desc = document.getElementById("bill-desc").value;
+  let amt = document.getElementById("bill-amt").value;
+  if(desc && amt) {
+    let box = document.getElementById("billing-items");
+    box.innerHTML += `<div>${desc}: $${amt}</div>`;
+    document.getElementById("bill-desc").value = "";
+    document.getElementById("bill-amt").value = "";
+  }
+}
+</script>
+
+</head>
+
+<body>
+
+<header id="header">Home</header>
+
+<!-- HOME -->
+<div class="screen active" id="home" data-title="Home">
+  <div class="box" onclick="showScreen('procedure-info')">Select Procedure</div>
+  <div class="box" onclick="showScreen('cost-estimator')">Cost Estimator</div>
+  <div class="box" onclick="showScreen('itinerary')">Itinerary</div>
+  <div class="box" onclick="showScreen('bookings')">Bookings</div>
+  <div class="box" onclick="showScreen('chat')">Help / Chat</div>
+</div>
+
+<!-- PROCEDURE INFO -->
+<div class="screen" id="procedure-info" data-title="Procedure Info">
+  <div class="box">Short Explanation of Procedure</div>
+  <div class="box">
+    Preparation Checklist:<br>
+    <input type="checkbox"> Blood Test<br>
+    <input type="checkbox"> Documents<br>
+    <input type="checkbox"> Fasting (if required)
+  </div>
+  <div class="box">
+    Recovery Expectations:<br>
+    <small>3–5 days hospital stay + light movement.</small>
+  </div>
+  <button class="primary" onclick="showScreen('compare-hospitals')">Compare Hospitals</button>
+</div>
+
+<!-- COMPARE HOSPITALS -->
+<div class="screen" id="compare-hospitals" data-title="Compare">
+  <div class="box">Hospital A | ⭐4.3 | Cost: $$ | Wait: 3 days</div>
+  <div class="box">Hospital B | ⭐4.6 | Cost: $$$ | Wait: 1 day</div>
+  <button class="primary" onclick="showScreen('cost-estimator')">Go to Cost Estimator</button>
+</div>
+
+<!-- COST ESTIMATOR -->
+<div class="screen" id="cost-estimator" data-title="Cost Estimator">
+  <div class="box">
+    Days of Stay:<br>
+    <input id="days" type="number" value="5">
+    Room Type:<br>
+    <select id="room">
+      <option value="1">Standard</option>
+      <option value="2">Premium</option>
+      <option value="3">Suite</option>
+    </select>
+    Number of Tests:<br>
+    <input id="tests" type="number" value="2">
+    <button class="primary" onclick="calculateCost()">Calculate</button>
+    <div id="cost-output" style="margin-top:10px;font-weight:bold;"></div>
+  </div>
+  <button class="primary" onclick="showScreen('itinerary')">Create Itinerary</button>
+</div>
+
+<!-- ITINERARY BUILDER -->
+<div class="screen" id="itinerary" data-title="Itinerary">
+  <div class="box">
+    Add an Itinerary Item:<br>
+    <input id="itinerary-input" placeholder="e.g., Flight Arrival 10 AM">
+    <button onclick="addItinerary()">Add</button>
+  </div>
+  <div class="box">
+    <ul id="itinerary-list"></ul>
+  </div>
+  <button class="primary" onclick="showScreen('bookings')">Go to Bookings</button>
+</div>
+
+<!-- BOOKINGS -->
+<div class="screen" id="bookings" data-title="Bookings">
+  <div class="box">
+    Hospital Appointment:<br>
+    <input placeholder="Choose date">
+  </div>
+  <div class="box">
+    Hotel Booking:<br>
+    <input placeholder="Select partner hotel">
+  </div>
+  <div class="box">
+    Transport:<br>
+    <input placeholder="Pickup time">
+  </div>
+</div>
+
+<!-- HOSPITAL NAV -->
+<div class="screen" id="hospital-nav" data-title="Hospital Map">
+  <div class="box">
+    Hospital Map (tap options)<br><br>
+    <button>Registration</button>
+    <button>Billing Desk</button>
+    <button>Radiology</button>
+    <button>Pharmacy</button>
+  </div>
+</div>
+
+<!-- TODAY'S PLAN -->
+<div class="screen" id="todays-plan" data-title="Today's Plan">
+  <div class="box">Today's Tests: <input placeholder="e.g., MRI at 3 PM"></div>
+  <div class="box">Doctor Visit: <input placeholder="e.g., Dr. A at 5 PM"></div>
+  <div class="box">Prep Instructions: <textarea></textarea></div>
+</div>
+
+<!-- BILLING -->
+<div class="screen" id="billing" data-title="Billing">
+  <div class="box">
+    Add Charge:<br>
+    <input id="bill-desc" placeholder="Description">
+    <input id="bill-amt" type="number" placeholder="Amount">
+    <button onclick="addBillingItem()">Add</button>
+  </div>
+  <div id="billing-items" class="box"></div>
+</div>
+
+<!-- DISCHARGE -->
+<div class="screen" id="discharge" data-title="Discharge">
+  <div class="box">
+    <input type="checkbox"> Medication collected<br>
+    <input type="checkbox"> Documents downloaded<br>
+    <input type="checkbox"> Fit-to-fly confirmed
+  </div>
+  <button class="primary" onclick="showScreen('followup')">Schedule Follow-Up</button>
+</div>
+
+<!-- FOLLOW-UP -->
+<div class="screen" id="followup" data-title="Follow-Up">
+  <div class="box">
+    Choose Follow-Up Date:<br>
+    <input type="date">
+  </div>
+  <button class="primary">Confirm</button>
+</div>
+
+<!-- CHAT -->
+<div class="screen" id="chat" data-title="Support Chat">
+  <div class="box">
+    Chat Simulation:<br><br>
+    <textarea placeholder="Type here..."></textarea>
+    <button>Send</button>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<nav>
+  <button onclick="showScreen('home')">Home</button>
+  <button onclick="showScreen('itinerary')">Itinerary</button>
+  <button onclick="showScreen('todays-plan')">Today</button>
+  <button onclick="showScreen('billing')">Billing</button>
+  <button onclick="showScreen('chat')">Chat</button>
+</nav>
+
+</body>
+</html>
